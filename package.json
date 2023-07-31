@@ -4,6 +4,7 @@
   "description": "Parametric Voronoi generator with real time editing and SVG export",
   "main": "main.js",
   "scripts": {
+    "serve": "npx serve",
     "build": "cp node_modules\\web-js-utils\\index.js ./src/web-js-utils.js"
   },
   "repository": {

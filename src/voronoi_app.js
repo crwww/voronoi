@@ -6,7 +6,7 @@ import { Shape } from "./shape.js"
 
 class voronoi_app{
     constructor(){
-        let [w,h] = ["100%","100%"]
+        let [w,h] = ["768","384"]
         let parent = document.createElement("template")
         this.parent = parent
         //const use_storage = false

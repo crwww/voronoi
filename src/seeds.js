@@ -65,7 +65,7 @@ class Seeds{
         this.config.is_debug = false
         this.config.debug_id = 0
         this.config.nb_seeds = 30
-        this.config.max_seeds = 200
+        this.config.max_seeds = 2000
         this.config.area = {width:400,height:200}
         this.config.nb_samples = 10
         this.config.walls_dist = true
@@ -317,7 +317,103 @@ class Seeds{
         return false
     }
     get_seeds(){
-        return this.array
+
+        // make array periodic??
+
+        // make bigger
+
+        // clone points on 8 sides
+/*
+
+1. Create the seeds on the original domain.
+2. Replicate the original domain 8 times to surround the original domain.
+3. Create the Voronoi tessellation on the extended domain.
+4. Cut out the original domain from the extended domain.
+
+        left = x - width
+        top = y - height
+        right = x + width;
+        bottom = y + height;
+
+x y id voronoiId
+        let s = {x:coord.x, y:coord.y, id:new_id}
+        this.array.push(s)
+
+
+  */      //take middle
+
+        // allow for border...
+
+        //topLeft = [];
+        const width = 768; // 3 * 256
+        const height = 384; // 3 * 128
+
+        let newPoints = [] ;
+        let nb_seeds = this.config.nb_seeds;
+        // scale down by 1/3
+        this.array.forEach(seed => {       
+            newPoints.push({x:seed.x / 3, y:seed.y / 3, id:seed.id} );
+        });
+
+        //copy orignal points to top middle
+        for(let i=0;i<nb_seeds;i++){ 
+            const new_id = newPoints[newPoints.length-1].id + 1;    
+            newPoints.push({x:newPoints[i].x + 256, y:newPoints[i].y , id:new_id} );
+        }
+
+        //copy orignal points to top right
+        for(let i=0;i<nb_seeds;i++){
+            const new_id = newPoints[newPoints.length-1].id + 1;    
+            newPoints.push({x:newPoints[i].x + 512, y:newPoints[i].y, id:new_id} );
+        }
+
+        //copy orignal points to middle left 
+        for(let i=0;i<nb_seeds;i++){
+            const new_id = newPoints[newPoints.length-1].id + 1;    
+            newPoints.push({x:newPoints[i].x , y:newPoints[i].y +  128, id:new_id} );
+        }
+
+        //copy orignal points to middle middle 
+        for(let i=0;i<nb_seeds;i++){
+            const new_id = newPoints[newPoints.length-1].id + 1;    
+            newPoints.push({x:newPoints[i].x + 256, y:newPoints[i].y + 128, id:new_id} );
+        }
+        
+       //copy orignal points to middle right 
+       for(let i=0;i<nb_seeds;i++){
+        const new_id = newPoints[newPoints.length-1].id + 1;    
+        newPoints.push({x:newPoints[i].x + 512 , y:newPoints[i].y + 128, id:new_id} );        
+        }
+
+       //copy orignal points to bottom left  
+       for(let i=0;i<nb_seeds;i++){ 
+        const new_id = newPoints[newPoints.length-1].id + 1;    
+        newPoints.push({x:newPoints[i].x, y:newPoints[i].y + 256, id:new_id} );        
+        }
+
+       //copy orignal points to bottom middle  
+       for(let i=0;i<nb_seeds;i++){ 
+        const new_id = newPoints[newPoints.length-1].id + 1;    
+        newPoints.push({x:newPoints[i].x + 256, y:newPoints[i].y + 256, id:new_id} );        
+        }
+       //copy orignal points to bottom right  
+       for(let i=0;i<nb_seeds;i++){ 
+        const new_id = newPoints[newPoints.length-1].id + 1;    
+        newPoints.push({x:newPoints[i].x + 512, y:newPoints[i].y + 256, id:new_id} );        
+        }
+// scale up and remove ones outside boundary??
+        // scale down by 1/3 
+        let finalPoints = [];
+        const recStart = (nb_seeds * 4) -1;
+        const recEnd = recStart + Number(nb_seeds) + 1;
+       //copy orignal points to bottom left  
+       console.log(newPoints);
+       console.log(recStart, recEnd, nb_seeds);
+       for(let i=recStart;i<=recEnd;i++){  
+        finalPoints.push({x:(newPoints[i].x)  , y:(newPoints[i].y) , id:newPoints[i].id } );        
+        }
+
+        return newPoints;  
     }
 
 }
