@@ -66,7 +66,7 @@ class Seeds{
         this.config.debug_id = 0
         this.config.nb_seeds = 30
         this.config.max_seeds = 2000
-        this.config.area = {width:400,height:200}
+        this.config.area = {width:512,height:512}
         this.config.nb_samples = 10
         this.config.walls_dist = true
         this.config.path_debug = false
@@ -338,68 +338,70 @@ class Seeds{
 x y id voronoiId
         let s = {x:coord.x, y:coord.y, id:new_id}
         this.array.push(s)
-
+    x:Math.random()*w,
+            y:Math.random()*h
 
   */      //take middle
 
         // allow for border...
 
         //topLeft = [];
-        const width = 768; // 3 * 256
-        const height = 384; // 3 * 128
+        const width = this.config.area.width / 3;
+        const height = this.config.area.height / 3;
 
         let newPoints = [] ;
         let nb_seeds = this.config.nb_seeds;
         // scale down by 1/3
         this.array.forEach(seed => {       
-            newPoints.push({x:seed.x / 3, y:seed.y / 3, id:seed.id} );
+            newPoints.push({x:Math.random()*width , y:Math.random()*height, id:seed.id} );
         });
+        
 
         //copy orignal points to top middle
         for(let i=0;i<nb_seeds;i++){ 
             const new_id = newPoints[newPoints.length-1].id + 1;    
-            newPoints.push({x:newPoints[i].x + 256, y:newPoints[i].y , id:new_id} );
+            newPoints.push({x:newPoints[i].x + width, y:newPoints[i].y , id:new_id} );
         }
 
         //copy orignal points to top right
         for(let i=0;i<nb_seeds;i++){
             const new_id = newPoints[newPoints.length-1].id + 1;    
-            newPoints.push({x:newPoints[i].x + 512, y:newPoints[i].y, id:new_id} );
+            newPoints.push({x:newPoints[i].x + (width * 2), y:newPoints[i].y, id:new_id} );
         }
 
         //copy orignal points to middle left 
         for(let i=0;i<nb_seeds;i++){
             const new_id = newPoints[newPoints.length-1].id + 1;    
-            newPoints.push({x:newPoints[i].x , y:newPoints[i].y +  128, id:new_id} );
+            newPoints.push({x:newPoints[i].x , y:newPoints[i].y + height, id:new_id} );
         }
 
         //copy orignal points to middle middle 
         for(let i=0;i<nb_seeds;i++){
             const new_id = newPoints[newPoints.length-1].id + 1;    
-            newPoints.push({x:newPoints[i].x + 256, y:newPoints[i].y + 128, id:new_id} );
+            newPoints.push({x:newPoints[i].x + width, y:newPoints[i].y + height, id:new_id} );
         }
         
        //copy orignal points to middle right 
        for(let i=0;i<nb_seeds;i++){
         const new_id = newPoints[newPoints.length-1].id + 1;    
-        newPoints.push({x:newPoints[i].x + 512 , y:newPoints[i].y + 128, id:new_id} );        
+        newPoints.push({x:newPoints[i].x + (width * 2) , y:newPoints[i].y + height, id:new_id} );        
         }
 
        //copy orignal points to bottom left  
        for(let i=0;i<nb_seeds;i++){ 
         const new_id = newPoints[newPoints.length-1].id + 1;    
-        newPoints.push({x:newPoints[i].x, y:newPoints[i].y + 256, id:new_id} );        
+        newPoints.push({x:newPoints[i].x, y:newPoints[i].y + (height * 2), id:new_id} );        
         }
 
        //copy orignal points to bottom middle  
        for(let i=0;i<nb_seeds;i++){ 
         const new_id = newPoints[newPoints.length-1].id + 1;    
-        newPoints.push({x:newPoints[i].x + 256, y:newPoints[i].y + 256, id:new_id} );        
+        newPoints.push({x:newPoints[i].x + (width), y:newPoints[i].y + (height * 2), id:new_id} );        
         }
        //copy orignal points to bottom right  
        for(let i=0;i<nb_seeds;i++){ 
         const new_id = newPoints[newPoints.length-1].id + 1;    
-        newPoints.push({x:newPoints[i].x + 512, y:newPoints[i].y + 256, id:new_id} );        
+        newPoints.push({x:newPoints[i].x + (width * 2), y:newPoints[i].y + (height * 2), id:new_id} );        
         }
 // scale up and remove ones outside boundary??
         // scale down by 1/3 

@@ -6,7 +6,7 @@ import { Shape } from "./shape.js"
 
 class voronoi_app{
     constructor(){
-        let [w,h] = ["768","384"]
+        let [w,h] = ["1024","1024"]
         let parent = document.createElement("template")
         this.parent = parent
         //const use_storage = false
@@ -35,8 +35,8 @@ class voronoi_app{
             this.cell_debug = 0;
             this.min_edge = 6
             this.is_color = false//not usable yet as flickers on updates
-            this.width = 920
-            this.height = 480
+            this.width = 1024
+            this.height = 1024
             this.cells_shape = "cubic"
             this.cells_space = 2
             this.use_unit = false
@@ -64,6 +64,8 @@ class voronoi_app{
             this.seeds.config = JSON.parse(localStorage.getItem("seeds_config"))
             this.shape.config = JSON.parse(localStorage.getItem("shape_config"))
             this.diagram.config = JSON.parse(localStorage.getItem("diag_config"))
+          //  this.width = JSON.parse(localStorage.getItem("size_config")).width
+          //  this.height = JSON.parse(localStorage.getItem("size_config")).height
         }
 
         this.svg = {}
@@ -207,7 +209,7 @@ class voronoi_app{
     save_svg(fileName){
         let svg_out = this.svg.main.cloneNode()//lazy, just for new svg creation
         this.draw_svg(svg_out,this.export_svg)
-        let svg = new Svg()
+        let svg = new Svg(svg_out)
         svg.save(fileName,svg_out)
     }
 

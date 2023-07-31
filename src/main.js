@@ -318,8 +318,11 @@ function menu_color(parent){
 
     $(btn_color).click(()=>{
         document.querySelectorAll("path").forEach(function(userPath) {
-            userPath.setAttribute("fill", "hsl("+ Math.floor(Math.random() * Math.floor(255)) + ",90%,60%)");
-            userPath.setAttribute("fill-opacity", "40%");
+            userPath.setAttribute("fill", "rgb(" + Math.floor(Math.random() * 255) + "," 
+            + Math.floor(Math.random() * 255) + "," 
+            + Math.floor(Math.random() * 255) +")");
+            
+            userPath.setAttribute("fill-opacity", "100%");
         })  
         
     })
