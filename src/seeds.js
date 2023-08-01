@@ -318,80 +318,57 @@ class Seeds {
     }
     get_seeds() {
 
-        // make array periodic??
+        // make seeds periodic  
+        // clone into 3x3 grid
+        // middle is tileable
 
-        // make bigger
-
-        // clone points on 8 sides
-        /*
-        
-        1. Create the seeds on the original domain.
-        2. Replicate the original domain 8 times to surround the original domain.
-        3. Create the Voronoi tessellation on the extended domain.
-        4. Cut out the original domain from the extended domain.
-        
-                left = x - width
-                top = y - height
-                right = x + width;
-                bottom = y + height;
-        
-        x y id voronoiId
-                let s = {x:coord.x, y:coord.y, id:new_id}
-                this.array.push(s)
-            x:Math.random()*w,
-                    y:Math.random()*h
-        
-          */      //take middle
-
-        // allow for border...
-
-        //topLeft = [];
-        const width = this.config.area.width / 3;
-        const height = this.config.area.height / 3;
+        const tileW = this.config.area.width / 3;
+        const tileH = this.config.area.height / 3;
+        const seedCount = this.config.nb_seeds;
 
         let newPoints = [];
-        let nb_seeds = this.config.nb_seeds;
+
         // scale down by 1/3
         this.array.forEach(seed => {
-            newPoints.push({ x: Math.random() * width, y: Math.random() * height, id: seed.id });
+            newPoints.push({ x: Math.random() * tileW, y: Math.random() * tileH, id: seed.id });
         });
 
         // copy all seeds to new locations using x y offsets
         function cloneSeeds(xo, yo) {
-            for (let i = 0; i < nb_seeds; i++) {
+            for (let i = 0; i < seedCount; i++) {
                 const new_id = newPoints[newPoints.length - 1].id + 1;
                 newPoints.push({ x: newPoints[i].x + xo, y: newPoints[i].y + yo, id: new_id });
             }
         }
 
         // top middle
-        cloneSeeds(width, 0);
+        cloneSeeds(tileW, 0);
         // top right
-        cloneSeeds(width * 2, 0);
+        cloneSeeds(tileW * 2, 0);
         // middle left 
-        cloneSeeds(0, height);
+        cloneSeeds(0, tileH);
         // middle middle 
-        cloneSeeds(width, height);
+        cloneSeeds(tileW, tileH);
         // middle right 
-        cloneSeeds(width * 2, height);
+        cloneSeeds(tileW * 2, tileH);
         // bottom left 
-        cloneSeeds(0, height * 2);
+        cloneSeeds(0, tileH * 2);
         // bottom middle 
-        cloneSeeds(width, height * 2);
+        cloneSeeds(tileW, tileH * 2);
         // bottom right 
-        cloneSeeds(width * 2, height * 2);
+        cloneSeeds(tileW * 2, tileH * 2);
 
-        // scale up and remove ones outside boundary??
-        // scale down by 1/3 
-        let finalPoints = [];
-        const recStart = (nb_seeds * 4) - 1;
-        const recEnd = recStart + Number(nb_seeds) + 1;
-        //copy orignal points to bottom left  
-        console.log(newPoints);
-        console.log(recStart, recEnd, nb_seeds);
-        for (let i = recStart; i <= recEnd; i++) {
-            finalPoints.push({ x: (newPoints[i].x), y: (newPoints[i].y), id: newPoints[i].id });
-        }
+        /*  
+           let finalPoints = [];
+           const recStart = (seedCount * 4) - 1;
+           const recEnd = recStart + Number(seedCount) + 1;
+           //copy orignal points to bottom left  
+           console.log(newPoints);
+           console.log(recStart, recEnd, seedCount);
+           for (let i = recStart; i <= recEnd; i++) {
+               finalPoints.push({ x: (newPoints[i].x), y: (newPoints[i].y), id: newPoints[i].id });
+           }
+           */
 
         return newPoints;
     }
