@@ -1,27 +1,27 @@
-import { defined,html,save_json,send} from "./web-js-utils.js"
-import {Svg} from "./svg_utils.js"
-import {Geometry} from "./geometry.js"
+import { defined, html, save_json, send } from "./web-js-utils.js"
+import { Svg } from "./svg_utils.js"
+import { Geometry } from "./geometry.js"
 
 let geom = new Geometry()
 let svg = new Svg()
 
-function samples_in_rect(nb,w,h){
+function samples_in_rect(nb, w, h) {
     let res = []
-    for(let i = 0;i<nb; i++){
+    for (let i = 0; i < nb; i++) {
         res.push({
-            x:Math.random()*w,
-            y:Math.random()*h
+            x: Math.random() * w,
+            y: Math.random() * h
         })
     }
     return res
 }
 
-function get_closest_index(seeds,coord){
+function get_closest_index(seeds, coord) {
     let index_of_closest = 0
     let closest_dist = Number.MAX_VALUE
-    for(let i=0;i<seeds.length;i++){
-        const d = geom.distance(coord,seeds[i])
-        if(d < closest_dist){
+    for (let i = 0; i < seeds.length; i++) {
+        const d = geom.distance(coord, seeds[i])
+        if (d < closest_dist) {
             index_of_closest = i
             closest_dist = d
         }
@@ -29,35 +29,35 @@ function get_closest_index(seeds,coord){
     return index_of_closest
 }
 
-function neighbors_walls_path_cost(sample,seeds,w,h,walls,path_points){
+function neighbors_walls_path_cost(sample, seeds, w, h, walls, path_points) {
     let free_dist = []
-    for(let j= 0;j<seeds.length;j++){
-        free_dist.push(geom.distance(sample,seeds[j]))
+    for (let j = 0; j < seeds.length; j++) {
+        free_dist.push(geom.distance(sample, seeds[j]))
     }
-    if(walls){
-        free_dist.push(geom.walls_distance(sample,w,h))
+    if (walls) {
+        free_dist.push(geom.walls_distance(sample, w, h))
     }
-    for(let j= 0;j<path_points.length;j++){
-        free_dist.push(geom.distance(sample,path_points[j]))
+    for (let j = 0; j < path_points.length; j++) {
+        free_dist.push(geom.distance(sample, path_points[j]))
     }
     const min_free_dist = Math.min(...free_dist)
-    return ((min_free_dist < 1)?10000:(100.0/min_free_dist))
+    return ((min_free_dist < 1) ? 10000 : (100.0 / min_free_dist))
 }
 
-function neighbors_walls_cost(sample,seeds,w,h,walls){
+function neighbors_walls_cost(sample, seeds, w, h, walls) {
     let free_dist = []
-    for(let j= 0;j<seeds.length;j++){
-        free_dist.push(geom.distance(sample,seeds[j]))
+    for (let j = 0; j < seeds.length; j++) {
+        free_dist.push(geom.distance(sample, seeds[j]))
     }
-    if(walls){
-        free_dist.push(geom.walls_distance(sample,w,h))
+    if (walls) {
+        free_dist.push(geom.walls_distance(sample, w, h))
     }
     const min_free_dist = Math.min(...free_dist)
-    return ((min_free_dist < 1)?10000:(100.0/min_free_dist))
+    return ((min_free_dist < 1) ? 10000 : (100.0 / min_free_dist))
 }
 
-class Seeds{
-    constructor(shape){
+class Seeds {
+    constructor(shape) {
         this.shape = shape
         this.array = []
 
@@ -66,17 +66,17 @@ class Seeds{
         this.config.debug_id = 0
         this.config.nb_seeds = 30
         this.config.max_seeds = 2000
-        this.config.area = {width:512,height:512}
+        this.config.area = { width: 512, height: 512 }
         this.config.nb_samples = 10
         this.config.walls_dist = true
         this.config.path_debug = false
         this.config.map_vs_dist = 10
         this.config.map_vs_dist_max = 30
         this.config.map_power = 1
-        this.config.map_power_range = {min:0.1,max:3,step:0.1}
+        this.config.map_power_range = { min: 0.1, max: 3, step: 0.1 }
     }
     //cost selection
-    best_seed_path_and_cost(samples){
+    best_seed_path_and_cost(samples) {
         const seeds = this.array
         const w = this.config.area.width
         const h = this.config.area.height
@@ -85,23 +85,23 @@ class Seeds{
         const use_cost_map = this.shape.use_cost_map()
         const use_cost_path = this.shape.use_cost_path()
         //console.log(samples.length)
-        for(let i=0;i<samples.length;i++){
-            let free_dist_cost,map_cost
+        for (let i = 0; i < samples.length; i++) {
+            let free_dist_cost, map_cost
             const s = samples[i]
-            if(use_cost_path){
-                free_dist_cost = neighbors_walls_path_cost(s,seeds,w,h,this.config.walls_dist,this.shape.path_points)
-            }else{
-                free_dist_cost = neighbors_walls_cost(s,seeds,w,h,this.config.walls_dist)
+            if (use_cost_path) {
+                free_dist_cost = neighbors_walls_path_cost(s, seeds, w, h, this.config.walls_dist, this.shape.path_points)
+            } else {
+                free_dist_cost = neighbors_walls_cost(s, seeds, w, h, this.config.walls_dist)
             }
-            if(use_cost_map){
+            if (use_cost_map) {
                 map_cost = this.shape.get_cost(s)
-                map_cost = this.config.map_vs_dist*Math.pow(map_cost,this.config.map_power)
-            }else{
+                map_cost = this.config.map_vs_dist * Math.pow(map_cost, this.config.map_power)
+            } else {
                 map_cost = 0
             }
             const total_cost = free_dist_cost + map_cost
             //console.log(`   costs = path:${free_dist_cost.toFixed(2)} , total:${total_cost.toFixed(2)}`)
-            if(total_cost < best_cost){
+            if (total_cost < best_cost) {
                 best_index = i
                 best_cost = total_cost
             }
@@ -110,205 +110,205 @@ class Seeds{
         return samples[best_index]
     }
     //sampling
-    try_sample_in_path(box){
-        let x,y
+    try_sample_in_path(box) {
+        let x, y
         let max_iter = 100
         let inside = false
-        while((!inside)&&(max_iter>0)){
-            x = box.x + Math.random()*box.width
-            y = box.y + Math.random()*box.height
-            if(geom.inside_id(x, y, this.shape.svg_path.id)){
+        while ((!inside) && (max_iter > 0)) {
+            x = box.x + Math.random() * box.width
+            y = box.y + Math.random() * box.height
+            if (geom.inside_id(x, y, this.shape.svg_path.id)) {
                 inside = true
             }
             max_iter--
         }
-        if(max_iter == 0){
+        if (max_iter == 0) {
             console.error(`can't sample in path : max iterations 100 reached`)
         }
-        return [x,y]
+        return [x, y]
     }
-    samples_in_path(box){
+    samples_in_path(box) {
         let res = []
-        for(let i=0;i<this.config.nb_samples;i++){
-            let [x,y] = this.try_sample_in_path(box)
-            res.push({x:x,y:y})
+        for (let i = 0; i < this.config.nb_samples; i++) {
+            let [x, y] = this.try_sample_in_path(box)
+            res.push({ x: x, y: y })
         }
         return res
     }
-    add_seeds(nb){
+    add_seeds(nb) {
         const w = this.config.area.width
         const h = this.config.area.height
         const inside_path = this.shape.sample_inside_path()
         let box = null
-        if(inside_path){
+        if (inside_path) {
             this.shape.append_path()
             box = this.shape.svg_path.getBoundingClientRect()
         }
-        for(let i=0;i<nb;i++){
+        for (let i = 0; i < nb; i++) {
             let samples
-            if(inside_path){
+            if (inside_path) {
                 samples = this.samples_in_path(box)
                 // Convert from viewport to SVG-relative coordinates
                 const parentRect = this.shape.parent.getBoundingClientRect()
-                for (let j=0;j<samples.length;j++){
+                for (let j = 0; j < samples.length; j++) {
                     samples[j].x -= parentRect.x;
                     samples[j].y -= parentRect.y;
                 }
-            }else{
-                samples = samples_in_rect(this.config.nb_samples,w,h)
+            } else {
+                samples = samples_in_rect(this.config.nb_samples, w, h)
             }
             let best_seed = this.best_seed_path_and_cost(samples)
             this.array.push(best_seed)
         }
-        if(inside_path){
+        if (inside_path) {
             this.shape.remove_path()
         }
     }
 
-    seed_outside_rect(coord){
-        if(coord.x > this.config.area.width){
+    seed_outside_rect(coord) {
+        if (coord.x > this.config.area.width) {
             return true
         }
-        if(coord.y > this.config.area.height){
+        if (coord.y > this.config.area.height) {
             return true
         }
         return false
     }
-    check_seeds_in_rect(){
-        for(let i=0;i<this.array.length;i++){
-            if(this.seed_outside_rect(this.array[i])){
-                this.array.splice(i,1)
+    check_seeds_in_rect() {
+        for (let i = 0; i < this.array.length; i++) {
+            if (this.seed_outside_rect(this.array[i])) {
+                this.array.splice(i, 1)
                 i--
             }
         }
     }
-    adjust_seeds_number(){
-        if(this.config.nb_seeds < this.array.length){
+    adjust_seeds_number() {
+        if (this.config.nb_seeds < this.array.length) {
             const nb_pop = this.array.length - this.config.nb_seeds
-            for(let i=0;i<nb_pop;i++){
+            for (let i = 0; i < nb_pop; i++) {
                 this.array.pop()
             }
-        }else if(this.config.nb_seeds > this.array.length){
+        } else if (this.config.nb_seeds > this.array.length) {
             const nb_seeds_to_add = this.config.nb_seeds - this.array.length
             this.add_seeds(nb_seeds_to_add)
         }
     }
-    reset_seeds_id(){
-        for(let i=0;i<this.array.length;i++){
+    reset_seeds_id() {
+        for (let i = 0; i < this.array.length; i++) {
             this.array[i].id = i
-            }
+        }
     }
 
 
     //-----------------------------------------------------------------------------------------------
     //user add is not filtered
-    add(coord){
-        const new_id = this.array[this.array.length-1].id + 1
-        let s = {x:coord.x, y:coord.y, id:new_id}
+    add(coord) {
+        const new_id = this.array[this.array.length - 1].id + 1
+        let s = { x: coord.x, y: coord.y, id: new_id }
         this.array.push(s)
     }
-    remove(coord){
-        const closest = get_closest_index(this.array,coord)
-        this.array.splice(closest,1)
+    remove(coord) {
+        const closest = get_closest_index(this.array, coord)
+        this.array.splice(closest, 1)
     }
-    move(coord){
-        const closest_index = get_closest_index(this.array,coord)
+    move(coord) {
+        const closest_index = get_closest_index(this.array, coord)
         let closest_seed = this.array[closest_index]
         closest_seed.x = coord.x
         closest_seed.y = coord.y
     }
-    update(params){
+    update(params) {
         let start = Date.now()
-        if(defined(params.clear) && (params.clear == true)){
+        if (defined(params.clear) && (params.clear == true)) {
             this.array = []
         }
-        if(defined(params.nb_seeds)){
+        if (defined(params.nb_seeds)) {
             this.config.nb_seeds = params.nb_seeds
         }
-        if(defined(params.nb_samples)){
+        if (defined(params.nb_samples)) {
             this.config.nb_samples = params.nb_samples
         }
-        if(defined(params.max_seeds)){
+        if (defined(params.max_seeds)) {
             this.config.max_seeds = params.max_seeds
         }
-        if(defined(params.walls_dist)){
+        if (defined(params.walls_dist)) {
             this.config.walls_dist = params.walls_dist
         }
-        if(defined(params.map_vs_dist)){
+        if (defined(params.map_vs_dist)) {
             this.config.map_vs_dist = params.map_vs_dist
-            send("vor_app",{type:"seeds",context:params.context})
+            send("vor_app", { type: "seeds", context: params.context })
         }
-        if(defined(params.map_power)){
+        if (defined(params.map_power)) {
             this.config.map_power = params.map_power
-            send("vor_app",{type:"seeds",context:params.context})
+            send("vor_app", { type: "seeds", context: params.context })
         }
-        if(defined(params.width)){
+        if (defined(params.width)) {
             this.config.area.width = params.width
         }
-        if(defined(params.height)){
+        if (defined(params.height)) {
             this.config.area.height = params.height
         }
-        if(defined(params.config)){
+        if (defined(params.config)) {
             this.load_config(params.config)
         }
-        if(defined(params.cell_debug)){
-            this.config.path_debug = (params.cell_debug!=0)
+        if (defined(params.cell_debug)) {
+            this.config.path_debug = (params.cell_debug != 0)
         }
         this.check_seeds_in_rect()
         this.adjust_seeds_number()
         this.reset_seeds_id()
-        let time = (Date.now()-start)
+        let time = (Date.now() - start)
         console.log(`seeds_update: ${time.toFixed(3)} ms`)
         return time
     }
 
-    draw(params){
+    draw(params) {
         svg.set_parent(params.svg)
-        if(this.array.length > 0){
-            let conditional_clip_path = (this.shape.config.cells_action == "cut_off")?'clip-path="url(#cut-off-cells)"':''
+        if (this.array.length > 0) {
+            let conditional_clip_path = (this.shape.config.cells_action == "cut_off") ? 'clip-path="url(#cut-off-cells)"' : ''
             let group = html(params.svg,/*html*/`<g id="svg_g_seeds" ${conditional_clip_path}/>`)
-            if(this.shape.show_inside_path()){
+            if (this.shape.show_inside_path()) {
                 this.shape.append_path()
-                for(let i=0;i<this.array.length;i++){
+                for (let i = 0; i < this.array.length; i++) {
                     const s = this.array[i]
                     const parentRect = this.shape.parent.getBoundingClientRect()
                     // Convert to viewport coordinates for hit testing
-                    if(geom.inside_id(s.x + parentRect.x, s.y + parentRect.y, this.shape.svg_path.id)){
-                        svg.circle_p_id(group,s.x,s.y,`c_${s.id}`)
+                    if (geom.inside_id(s.x + parentRect.x, s.y + parentRect.y, this.shape.svg_path.id)) {
+                        svg.circle_p_id(group, s.x, s.y, `c_${s.id}`)
                     }
                 }
                 this.shape.remove_path()
-            }else{
-                for(let i=0;i<this.array.length;i++){
+            } else {
+                for (let i = 0; i < this.array.length; i++) {
                     const s = this.array[i]
-                    svg.circle_p_id(group,s.x,s.y,`c_${s.id}`)
+                    svg.circle_p_id(group, s.x, s.y, `c_${s.id}`)
                 }
             }
         }
     }
-    save(fileName){
-        this.array.forEach((s)=>{
+    save(fileName) {
+        this.array.forEach((s) => {
             delete s.voronoiId
         })
-        const data = {window:{width:this.config.area.width,height:this.config.area.height},seeds:this.array}
-        save_json(data,fileName)
+        const data = { window: { width: this.config.area.width, height: this.config.area.height }, seeds: this.array }
+        save_json(data, fileName)
     }
-    load(data,params){
-        if(defined(data.window) && defined(data.seeds)){
+    load(data, params) {
+        if (defined(data.window) && defined(data.seeds)) {
             this.array = data.seeds
             this.config.nb_seeds = this.array.length
             //this window size will be fed by from the app through window control
-            send("main_window",{type:"resize",width:data.window.width,height:data.window.height})
+            send("main_window", { type: "resize", width: data.window.width, height: data.window.height })
             return true
-        }else{
-            if(Array.isArray(data)){
-                if(data.length > 0){
+        } else {
+            if (Array.isArray(data)) {
+                if (data.length > 0) {
                     const seed0 = data[0]
-                    if((defined(seed0.x)) && (defined(seed0.y)) &&(defined(seed0.id))){
+                    if ((defined(seed0.x)) && (defined(seed0.y)) && (defined(seed0.id))) {
                         console.log("file structure - OK")
                         this.array = data
                         this.config.nb_seeds = this.array.length
-                        send("vor_app",{type:"seeds",context:params.context})
+                        send("vor_app", { type: "seeds", context: params.context })
                         return true
                     }
                 }
@@ -316,32 +316,32 @@ class Seeds{
         }
         return false
     }
-    get_seeds(){
+    get_seeds() {
 
         // make array periodic??
 
         // make bigger
 
         // clone points on 8 sides
-/*
-
-1. Create the seeds on the original domain.
-2. Replicate the original domain 8 times to surround the original domain.
-3. Create the Voronoi tessellation on the extended domain.
-4. Cut out the original domain from the extended domain.
-
-        left = x - width
-        top = y - height
-        right = x + width;
-        bottom = y + height;
-
-x y id voronoiId
-        let s = {x:coord.x, y:coord.y, id:new_id}
-        this.array.push(s)
-    x:Math.random()*w,
-            y:Math.random()*h
-
-  */      //take middle
+        /*
+        
+        1. Create the seeds on the original domain.
+        2. Replicate the original domain 8 times to surround the original domain.
+        3. Create the Voronoi tessellation on the extended domain.
+        4. Cut out the original domain from the extended domain.
+        
+                left = x - width
+                top = y - height
+                right = x + width;
+                bottom = y + height;
+        
+        x y id voronoiId
+                let s = {x:coord.x, y:coord.y, id:new_id}
+                this.array.push(s)
+            x:Math.random()*w,
+                    y:Math.random()*h
+        
+          */      //take middle
 
         // allow for border...
 
@@ -349,75 +349,53 @@ x y id voronoiId
         const width = this.config.area.width / 3;
         const height = this.config.area.height / 3;
 
-        let newPoints = [] ;
+        let newPoints = [];
         let nb_seeds = this.config.nb_seeds;
         // scale down by 1/3
-        this.array.forEach(seed => {       
-            newPoints.push({x:Math.random()*width , y:Math.random()*height, id:seed.id} );
+        this.array.forEach(seed => {
+            newPoints.push({ x: Math.random() * width, y: Math.random() * height, id: seed.id });
         });
-        
 
-        //copy orignal points to top middle
-        for(let i=0;i<nb_seeds;i++){ 
-            const new_id = newPoints[newPoints.length-1].id + 1;    
-            newPoints.push({x:newPoints[i].x + width, y:newPoints[i].y , id:new_id} );
-        }
-
-        //copy orignal points to top right
-        for(let i=0;i<nb_seeds;i++){
-            const new_id = newPoints[newPoints.length-1].id + 1;    
-            newPoints.push({x:newPoints[i].x + (width * 2), y:newPoints[i].y, id:new_id} );
+        // copy all seeds to new locations using x y offsets
+        function cloneSeeds(xo, yo) {
+            for (let i = 0; i < nb_seeds; i++) {
+                const new_id = newPoints[newPoints.length - 1].id + 1;
+                newPoints.push({ x: newPoints[i].x + xo, y: newPoints[i].y + yo, id: new_id });
+            }
         }
 
-        //copy orignal points to middle left 
-        for(let i=0;i<nb_seeds;i++){
-            const new_id = newPoints[newPoints.length-1].id + 1;    
-            newPoints.push({x:newPoints[i].x , y:newPoints[i].y + height, id:new_id} );
-        }
+        // top middle
+        cloneSeeds(width, 0);
+        // top right
+        cloneSeeds(width * 2, 0);
+        // middle left 
+        cloneSeeds(0, height);
+        // middle middle 
+        cloneSeeds(width, height);
+        // middle right 
+        cloneSeeds(width * 2, height);
+        // bottom left 
+        cloneSeeds(0, height * 2);
+        // bottom middle 
+        cloneSeeds(width, height * 2);
+        // bottom right 
+        cloneSeeds(width * 2, height * 2);
 
-        //copy orignal points to middle middle 
-        for(let i=0;i<nb_seeds;i++){
-            const new_id = newPoints[newPoints.length-1].id + 1;    
-            newPoints.push({x:newPoints[i].x + width, y:newPoints[i].y + height, id:new_id} );
-        }
-        
-       //copy orignal points to middle right 
-       for(let i=0;i<nb_seeds;i++){
-        const new_id = newPoints[newPoints.length-1].id + 1;    
-        newPoints.push({x:newPoints[i].x + (width * 2) , y:newPoints[i].y + height, id:new_id} );        
-        }
-
-       //copy orignal points to bottom left  
-       for(let i=0;i<nb_seeds;i++){ 
-        const new_id = newPoints[newPoints.length-1].id + 1;    
-        newPoints.push({x:newPoints[i].x, y:newPoints[i].y + (height * 2), id:new_id} );        
-        }
-
-       //copy orignal points to bottom middle  
-       for(let i=0;i<nb_seeds;i++){ 
-        const new_id = newPoints[newPoints.length-1].id + 1;    
-        newPoints.push({x:newPoints[i].x + (width), y:newPoints[i].y + (height * 2), id:new_id} );        
-        }
-       //copy orignal points to bottom right  
-       for(let i=0;i<nb_seeds;i++){ 
-        const new_id = newPoints[newPoints.length-1].id + 1;    
-        newPoints.push({x:newPoints[i].x + (width * 2), y:newPoints[i].y + (height * 2), id:new_id} );        
-        }
-// scale up and remove ones outside boundary??
+        // scale up and remove ones outside boundary??
         // scale down by 1/3 
         let finalPoints = [];
-        const recStart = (nb_seeds * 4) -1;
+        const recStart = (nb_seeds * 4) - 1;
         const recEnd = recStart + Number(nb_seeds) + 1;
-       //copy orignal points to bottom left  
-       console.log(newPoints);
-       console.log(recStart, recEnd, nb_seeds);
-       for(let i=recStart;i<=recEnd;i++){  
-        finalPoints.push({x:(newPoints[i].x)  , y:(newPoints[i].y) , id:newPoints[i].id } );        
+        //copy orignal points to bottom left  
+        console.log(newPoints);
+        console.log(recStart, recEnd, nb_seeds);
+        for (let i = recStart; i <= recEnd; i++) {
+            finalPoints.push({ x: (newPoints[i].x), y: (newPoints[i].y), id: newPoints[i].id });
         }
 
-        return newPoints;  
+        return newPoints;
     }
 
 }
 
-export{Seeds}
+export { Seeds }

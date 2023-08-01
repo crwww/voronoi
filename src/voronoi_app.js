@@ -209,7 +209,7 @@ class voronoi_app{
     save_svg(fileName){
         let svg_out = this.svg.main.cloneNode()//lazy, just for new svg creation
         this.draw_svg(svg_out,this.export_svg)
-        let svg = new Svg(svg_out)
+        let svg = new Svg()
         svg.save(fileName,svg_out)
     }
 
